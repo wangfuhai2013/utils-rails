@@ -9,9 +9,14 @@ module Utils
     end
 
     #输出预览图
-    def thumbnail(file,width = 150)
+    def thumbnail(file,width=150,use_thumb=true)
       output = '暂无图片'
       if file
+        if use_thumb
+          thumb_file = Utils::FileUtil.get_thumb_file(file) 
+          full_name = Rails.root.join("public",thumb_file)
+          file = thumb_file if File.exist?(full_name)
+        end
         output = "<div class=\"img-thumbnail\">" + image_tag("/"+file,:width=>width) +"</div>"
       end
       output.html_safe
