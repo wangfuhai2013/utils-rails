@@ -14,11 +14,12 @@ module Utils
       if file
         if use_thumb
           thumb_file = Utils::FileUtil.get_thumb_file(file) 
-          full_name = Rails.root.join("public",thumb_file)
-          file = thumb_file if File.exist?(full_name)
+          full_name = Rails.root.join("public",thumb_file.to_s) 
+          file = thumb_file if File.file?(full_name)
         end
         output = "<div class=\"img-thumbnail\">" + image_tag("/"+file,:width=>width) +"</div>"
       end
+      
       output.html_safe
     end
 

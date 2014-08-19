@@ -9,11 +9,11 @@ module Utils
 
     #获取预览图文件名
     def self.get_thumb_file(file_name)
-       file_name[0..file_name.index('.')-1] +  "_thumb.jpg"
+       file_name[0..file_name.index('.')-1] +  "_thumb.jpg" unless file_name.index('.').nil?
     end
     #获取移动图片文件名
     def self.get_mobile_file(file_name)
-       file_name[0..file_name.index('.')-1] +  "_mobile.jpg"
+       file_name[0..file_name.index('.')-1] +  "_mobile.jpg" unless file_name.index('.').nil?
     end  
 
     #删除文件
@@ -24,12 +24,12 @@ module Utils
          File.delete(full_name) if File.exist?(full_name)
 
          thumb_name = get_thumb_file(file_name)
-         full_name = Rails.root.join("public",thumb_name)
-         File.delete(full_name) if File.exist?(full_name)
+         full_name = Rails.root.join("public",thumb_name) if thumb_name
+         File.delete(full_name) if File.file?(full_name)
 
          mobile_name = get_mobile_file(file_name)
-         full_name = Rails.root.join("public",mobile_name)
-         File.delete(full_name) if File.exist?(full_name)
+         full_name = Rails.root.join("public",mobile_name) if mobile_name
+         File.delete(full_name) if File.file?(full_name)
       end
     end
 
