@@ -57,8 +57,8 @@ module Utils
        if res_file
            upload_path = get_upload_save_path
            file_name   = get_upload_save_name(res_file.original_filename,to_jpg)
-           abs_file_name = Rails.root.join("public",upload_path,file_name)
-           logger.debug("res_file:" + res_file.original_filename)
+           abs_file_name = Rails.root.join("public",upload_path,file_name).to_s
+           logger.debug("res_file:" + res_file.original_filename + ",abs_file_name:" + abs_file_name)
            #所有图片默认自动转成jpg格式，并且宽控制在720以内，压缩质量为80，以减小文件大小           
            max_width = 720
            max_width = Rails.configuration.image_max_width.to_i if Rails.configuration.respond_to?('image_max_width')
