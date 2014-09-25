@@ -152,7 +152,7 @@ module Utils
     end
 
      #设置session中的openid值
-    def self.set_session_openid(params,session,session_name='openid')    
+    def self.set_session_openid(params,session,return_url,session_name='openid')    
       #测试 start o6hyyjlRoyQelo6YgWstsRJjSBb8
       unless params[:openid].blank? 
         #TODO 校验是从微信传过来的参数才写入session；或者使用加密参数，用于没有网页授权接口权限的公众号
@@ -179,7 +179,7 @@ module Utils
       end
       if params[:state].nil?
          #如果有state参数，表示从接口返回，不需再跳转
-        redirect_to get_oauth2_url(request.original_url,'snsapi_base')
+        redirect_to get_oauth2_url(return_url,'snsapi_base')
       end       
     end
 
