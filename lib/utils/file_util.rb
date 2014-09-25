@@ -134,19 +134,19 @@ module Utils
     def self.mobile_image(file_name,format="jpg",size="0")
        if image_file?(file_name)
          image = MiniMagick::Image.open(file_name)
-           image.format format
-           
-           mobile_size = "720x" 
-           mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
-           mobile_size = size unless size == "0"
+         image.format format
+         
+         mobile_size = "720x" 
+         mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
+         mobile_size = size unless size == "0"
 
-           image.resize mobile_size
-           #image.combine_options do |i|           
-           #  i.resize "150x150^"
-           #  i.gravity "center"
-           #  i.crop "150x150+0+0"
-           # end
-           image.write  get_mobile_file(file_name)
+         image.resize mobile_size
+         #image.combine_options do |i|           
+         #  i.resize "150x150^"
+         #  i.gravity "center"
+         #  i.crop "150x150+0+0"
+         # end
+         image.write  get_mobile_file(file_name)
        end
     end
 
