@@ -152,8 +152,7 @@ module Utils
     end
 
      #设置session中的openid值
-    def self.set_session_openid(session_name='openid')    
-
+    def self.set_session_openid(params,session,session_name='openid')    
       #测试 start o6hyyjlRoyQelo6YgWstsRJjSBb8
       unless params[:openid].blank? 
         #TODO 校验是从微信传过来的参数才写入session；或者使用加密参数，用于没有网页授权接口权限的公众号
