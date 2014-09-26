@@ -56,7 +56,7 @@ module Utils
      end
 
      #获取access_token
-     def self.get_access_token(app_id=nil,secert=nil)
+     def self.get_access_token(app_id=nil,app_secret=nil)
         app_id = Rails.configuration.weixin_app_id if app_id.nil?
         app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
         cache = @@access_token_list[app_id]
@@ -89,10 +89,10 @@ module Utils
      end
 
     #获取opendid
-    def self.get_openid(code,app_id=nil,secert=nil)
+    def self.get_openid(code,app_id=nil,app_secret=nil)
         app_id = Rails.configuration.weixin_app_id if app_id.nil?
         app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
-        path = "/sns/oauth2/access_token?appid=" + app_id + "&secret=" + secert + 
+        path = "/sns/oauth2/access_token?appid=" + app_id + "&secret=" + app_secret + 
                 "&code=" + code + "&grant_type=authorization_code"
         uri = URI.parse("https://api.weixin.qq.com/")
         http = Net::HTTP.new(uri.host, uri.port)
@@ -109,10 +109,10 @@ module Utils
      end
 
     #发送客服消息
-    def self.send_message(to_openid,message,app_id=nil,secert=nil)
+    def self.send_message(to_openid,message,app_id=nil,app_secret=nil)
       app_id = Rails.configuration.weixin_app_id if app_id.nil?
       app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
-      access_token = get_access_token(app_id,secert)
+      access_token = get_access_token(app_id,app_secret)
       data = '{"touser":"'+ to_openid +'" , "msgtype": "text", "text": {"content": "' + 
                message + '"}}'                              
       path = '/cgi-bin/message/custom/send?access_token=' + access_token
@@ -123,10 +123,10 @@ module Utils
     end
 
     #获取用户信息
-    def self.get_userinfo(openid,app_id=nil,secert=nil)
+    def self.get_userinfo(openid,app_id=nil,app_secret=nil)
       app_id = Rails.configuration.weixin_app_id if app_id.nil?
       app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
-      access_token = get_access_token(app_id,secert)
+      access_token = get_access_token(app_id,app_secret)
       url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + access_token + 
             "&openid=" + openid + "&lang=zh_CN"
       conn = Faraday.new(:url => url)
