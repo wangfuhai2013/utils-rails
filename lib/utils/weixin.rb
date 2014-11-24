@@ -1,23 +1,3 @@
-module HTTPResponseDecodeContentOverride
-  def initialize(h,c,m)
-    super(h,c,m)
-    @decode_content = true
-  end
-  def body
-    res = super
-    if self['content-length']
-      self['content-length']= res.bytesize
-    end
-    res
-  end
-end
-module Net
-  class HTTPResponse
-    prepend HTTPResponseDecodeContentOverride
-  end
-end
-
-
 module Utils
   class Weixin    
     @@access_token_list = {}
@@ -169,7 +149,7 @@ module Utils
       data = '{"touser":"'+ to_openid +'" , "msgtype": "text", "text": {"content": "' + 
                message + '"}}'                              
       path = '/cgi-bin/message/custom/send?access_token=' + access_token
-      result = post_weixin_data(data,path)
+      result = post_data(data,path)
       if result["errcode"] != 0
          logger.error("Utils::Weixin.send_message to :"+to_openid + " result:" + result["errmsg"]) 
       end
@@ -189,5 +169,6 @@ module Utils
       sign = Digest::SHA1.hexdigest(result_string[0, result_string.length - 1]) if sign_type == 'SHA1'
       sign
     end
+
   end
 end
