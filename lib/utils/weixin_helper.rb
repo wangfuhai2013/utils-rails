@@ -16,7 +16,8 @@ module Utils
          return #已设置，直接返回
       end
 
-      state = Rails.configuration.weixin_oauth2_state 
+      state = 'oauth2'
+      state = Rails.configuration.weixin_oauth2_state if Rails.configuration.respond_to?('weixin_oauth2_state')
       if !params[:state].nil? && params[:state] == state && params[:code] #从授权接口返回
          openid = Utils::Weixin.get_openid(params[:code],app_id,app_secret)
          if openid
@@ -35,7 +36,8 @@ module Utils
 
       #获取oauth2 access_token，并设置实例变量
       def set_oauth2_access_token(app_id=nil,app_secret=nil)
-        state = Rails.configuration.weixin_oauth2_state 
+        state = 'oauth2'
+        state = Rails.configuration.weixin_oauth2_state if Rails.configuration.respond_to?('weixin_oauth2_state')
         if !params[:state].nil? && params[:state] == state && params[:code] #从授权接口返回
            @oauth2_access_token = Utils::Weixin.get_oauth2_access_token(params[:code],app_id,app_secret)  
            return

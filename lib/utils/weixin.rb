@@ -29,7 +29,9 @@ module Utils
      def self.get_oauth2_url(redirect_uri,auth_type,app_id=nil)
         app_id = Rails.configuration.weixin_app_id if app_id.nil?
         redirect_uri = CGI::escape(redirect_uri)
-        state = Rails.configuration.weixin_oauth2_state
+        
+        state = 'oauth2'
+        state = Rails.configuration.weixin_oauth2_state if Rails.configuration.respond_to?('weixin_oauth2_state')  
         url = "https://open.weixin.qq.com/connect/oauth2/authorize?" + 
               "appid=" + app_id + "&redirect_uri=" + redirect_uri + "&response_type=code" + 
               "&scope=" + auth_type + "&state=" + state + "#wechat_redirect"
