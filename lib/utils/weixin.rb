@@ -76,8 +76,13 @@ module Utils
        return token       
      end
 
-    #获取opendid
+    #获取opendid，用于snsapi_base授权
     def self.get_openid(code,app_id=nil,app_secret=nil)
+        openid,access_token = Utils::Weixin.get_openid_and_access_token(code,app_id,app_secret)
+        return openid      
+     end
+     #同时获取openid和access_token,用于snsapi_userinfo授权
+     def self.get_openid_and_access_token(code,app_id=nil,app_secret=nil)
         app_id = Rails.configuration.weixin_app_id if app_id.nil?
         app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
         path = "/sns/oauth2/access_token?appid=" + app_id + "&secret=" + app_secret + 
@@ -91,12 +96,26 @@ module Utils
         response = http.request(request)        
         result = JSON.parse(response.body)
         logger.error("Utils::Weixin.get_openid fail,result:"+result.to_s) if result["openid"].blank?
-        openid = nil
+        openid = access_token = nil
         openid = result["openid"] if result["openid"]
-        return openid      
+        access_token = result["access_token"] if result["access_token"]
+        return openid,access_token      
      end
 
-    #获取用户信息
+    #通过网页授权获取用户信息（无须关注公众号）
+    def self.get_userinfo_by_auth(access_token,openid)
+      url = "https://api.weixin.qq.com/sns/userinfo?access_token=" + access_token.to_s + 
+            "&openid=" + openid.to_s + "&lang=zh_CN"
+      conn = Faraday.new(:url => url)
+      result = JSON.parse conn.get.body 
+      if result["errmsg"]
+         logger.error("Utils::Weixin.get_userinfo_by_auth of openid: "+ openid.to_s + 
+                      ",access_token:" + access_token.to_s + ", error:" + result["errmsg"]) 
+      end
+      result
+    end
+
+    #获取用户信息（仅对关注者有效）
     def self.get_userinfo(openid,app_id=nil,app_secret=nil)
       app_id = Rails.configuration.weixin_app_id if app_id.nil?
       app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
