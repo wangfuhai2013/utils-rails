@@ -52,11 +52,11 @@ module Utils
     end
 
    #微信支付处理(JSAPI v2)
-    def jsapi2(out_trade_no,total_fee,body,notify_url,openid,ip,app_id=nil,app_secret=nil,pay_sign_key=nil,mch_id=nil)
+    def self.jsapi2(out_trade_no,total_fee,body,notify_url,openid,ip,app_id=nil,app_secret=nil,pay_sign_key=nil,mch_id=nil)
 
         app_id = Rails.configuration.weixin_app_id  if app_id.nil?
         app_secret = Rails.configuration.weixin_app_secret  if app_secret.nil?
-        pay_sign_key= Rails.configuration.weixin_pay_sign_key  if pay_sign.nil?
+        pay_sign_key= Rails.configuration.weixin_pay_sign_key  if pay_sign_key.nil?
         mch_id= Rails.configuration.weixin_mch_id if mch_id.nil?
 
         #构造支付订单接口参数
