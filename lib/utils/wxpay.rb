@@ -52,7 +52,7 @@ module Utils
     end
 
    #微信支付处理(JSAPI v2)
-    def self.jsapi2(out_trade_no,total_fee,body,notify_url,openid,ip,app_id=nil,pay_sign_key=nil,mch_id=nil)
+    def self.jsapi2(out_trade_no,total_fee,body,notify_url,openid,ip,app_id=nil,mch_id=nil,pay_sign_key=nil)
 
         app_id = Rails.configuration.weixin_app_id  if app_id.nil?        
         pay_sign_key= Rails.configuration.weixin_pay_sign_key  if pay_sign_key.nil?
@@ -82,12 +82,12 @@ module Utils
             :signType => "MD5" 
           }
           package_params[:paySign] = Utils::Wxpay.pay_sign(package_params,pay_sign_key)
+          return package_params
         else         
            logger.info("weixin_pay.error:" + pay_order["return_msg"].to_s + ";" + 
                pay_order["err_code_des"].to_s )
            return nil
-        end   
-        return package_params       
+        end    
     end
 
   end
