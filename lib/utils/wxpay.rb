@@ -76,7 +76,7 @@ module Utils
         if pay_order["return_code"][0] == 'SUCCESS' && pay_order["result_code"][0] == 'SUCCESS'
           package_params = {
             :appId => app_id,
-            :timeStamp => Time.now.to_i,
+            :timeStamp => Time.now.to_i.to_s,#必须是字符串，否则iPhone下报错
             :nonceStr => Digest::MD5.hexdigest(Time.now.to_s).to_s,
             :package => "prepay_id=" + pay_order["prepay_id"][0],
             :signType => "MD5" 
