@@ -163,7 +163,7 @@ module Utils
      end
 
     #发送客服消息
-    def self.send_message(to_openid,message,app_id=nil,app_secret=nil)
+    def self.send_customer_message(to_openid,message,app_id=nil,app_secret=nil)
       app_id = Rails.configuration.weixin_app_id if app_id.nil?
       app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
       access_token = get_access_token(app_id,app_secret)
@@ -172,7 +172,29 @@ module Utils
       path = '/cgi-bin/message/custom/send?access_token=' + access_token
       result = post_data(data,path)
       if result["errcode"] != 0
-         logger.error("Utils::Weixin.send_message to :"+to_openid + " result:" + result["errmsg"]) 
+         logger.error("Utils::Weixin.send_customer_message to :"+to_openid + " result:" + result["errmsg"]) 
+      end
+    end
+
+    #发送模板消息
+    def self.send_template_message(to_openid,template_id,message,url='',top_color='#FF0000',value_color='#173177',
+                                   app_id=nil,app_secret=nil)
+      app_id = Rails.configuration.weixin_app_id if app_id.nil?
+      app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+      access_token = get_access_token(app_id,app_secret)
+
+      data = '{"touser":"'+ to_openid +'","template_id":"' + template_id +'","url":"' + url  + '",' +
+              '"topcolor":"' + top_color + '","data":{'
+      message.each do |m_k,m_v|
+         data += '"' + m_k + '":{"value":"' + m_v + '","color":"' + value_color + '"},'         
+      end
+      data.chop! if data.end_with?(',')
+      data += '}}'                 
+      logger.debug("send_template_message data:" + data)         
+      path = '/cgi-bin/message/template/send?access_token=' + access_token
+      result = post_data(data,path)
+      if result["errcode"] != 0
+         logger.error("Utils::Weixin.send_template_message to :"+to_openid + " result:" + result["errmsg"]) 
       end
     end
 
