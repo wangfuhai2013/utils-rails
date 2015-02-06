@@ -76,6 +76,14 @@ module Utils
        end
     end 
 
+    #从URL保存文件
+    def self.save_from_url (url) 
+        save_path  = get_upload_save_path + "/" + get_upload_save_name(url,false)
+        conn = Faraday.new(:url => url)        
+        File.open(Rails.root.join("public",save_path).to_s, 'wb') { |f| f.write(conn.get.body) }
+        return save_path
+    end
+
     #获取上传文件保存路径
     def self.get_upload_save_path
        upload_path = Rails.configuration.upload_path + "/"+ Time.now.strftime("%Y%m/%d")
