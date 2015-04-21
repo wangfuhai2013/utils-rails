@@ -2,6 +2,10 @@ module Utils
   class Weixin    
     @@access_token_list = {}
     @@oauth2_access_token_list = {}
+    
+    class << self
+      attr_accessor :app_id,:app_secret,:mch_id,:pay_sign_key,:oauth2_state
+    end
 
     #定义logger
     def self.logger
@@ -27,11 +31,11 @@ module Utils
 
      #获取oauth2 url
      def self.get_oauth2_url(redirect_uri,auth_type,app_id=nil)
-        app_id = Rails.configuration.weixin_app_id if app_id.nil?
+        app_id = Utils::Weixin.app_id if app_id.nil?
         redirect_uri = CGI::escape(redirect_uri)
         
         state = 'oauth2'
-        state = Rails.configuration.weixin_oauth2_state if Rails.configuration.respond_to?('weixin_oauth2_state')  
+        state = Utils::Weixin.oauth2_state if Utils::Weixin.respond_to?('oauth2_state')  
         url = "https://open.weixin.qq.com/connect/oauth2/authorize?" + 
               "appid=" + app_id + "&redirect_uri=" + redirect_uri + "&response_type=code" + 
               "&scope=" + auth_type + "&state=" + state + "#wechat_redirect"
@@ -39,8 +43,8 @@ module Utils
      end
 
      def self.get_oauth2_access_token(code,app_id=nil,app_secret=nil)
-        app_id = Rails.configuration.weixin_app_id if app_id.nil?
-        app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+        app_id = Utils::Weixin.app_id if app_id.nil?
+        app_secret = Utils::Weixin.app_secret if app_secret.nil?
         cache = @@oauth2_access_token_list[app_id]
 
         token = nil
@@ -83,8 +87,8 @@ module Utils
      end
      #同时获取openid和access_token,用于snsapi_userinfo授权
      def self.get_openid_and_access_token(code,app_id=nil,app_secret=nil)
-        app_id = Rails.configuration.weixin_app_id if app_id.nil?
-        app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+        app_id = Utils::Weixin.app_id if app_id.nil?
+        app_secret = Utils::Weixin.app_secret if app_secret.nil?
         path = "/sns/oauth2/access_token?appid=" + app_id + "&secret=" + app_secret + 
                 "&code=" + code + "&grant_type=authorization_code"
         uri = URI.parse("https://api.weixin.qq.com/")
@@ -117,8 +121,8 @@ module Utils
 
     #获取用户信息（仅对关注者有效）
     def self.get_userinfo(openid,app_id=nil,app_secret=nil)
-      app_id = Rails.configuration.weixin_app_id if app_id.nil?
-      app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+      app_id = Utils::Weixin.app_id if app_id.nil?
+      app_secret = Utils::Weixin.app_secret if app_secret.nil?
       access_token = get_access_token(app_id,app_secret)
       url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=" + access_token + 
             "&openid=" + openid + "&lang=zh_CN"
@@ -132,8 +136,8 @@ module Utils
 
      #获取基础access_token
      def self.get_access_token(app_id=nil,app_secret=nil)
-        app_id = Rails.configuration.weixin_app_id if app_id.nil?
-        app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+        app_id = Utils::Weixin.app_id if app_id.nil?
+        app_secret = Utils::Weixin.app_secret if app_secret.nil?
         cache = @@access_token_list[app_id]
 
         token = nil
@@ -164,8 +168,8 @@ module Utils
 
     #发送客服消息
     def self.send_customer_message(to_openid,message,app_id=nil,app_secret=nil)
-      app_id = Rails.configuration.weixin_app_id if app_id.nil?
-      app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+      app_id = Utils::Weixin.app_id if app_id.nil?
+      app_secret = Utils::Weixin.app_secret if app_secret.nil?
       access_token = get_access_token(app_id,app_secret)
       data = '{"touser":"'+ to_openid +'" , "msgtype": "text", "text": {"content": "' + 
                message + '"}}'                              
@@ -179,8 +183,8 @@ module Utils
     #发送模板消息
     def self.send_template_message(to_openid,template_id,message,url='',top_color='#FF0000',value_color='#173177',
                                    app_id=nil,app_secret=nil)
-      app_id = Rails.configuration.weixin_app_id if app_id.nil?
-      app_secret = Rails.configuration.weixin_app_secret if app_secret.nil?
+      app_id = Utils::Weixin.app_id if app_id.nil?
+      app_secret = Utils::Weixin.app_secret if app_secret.nil?
       access_token = get_access_token(app_id,app_secret)
 
       data = '{"touser":"'+ to_openid +'","template_id":"' + template_id +'","url":"' + url  + '",' +

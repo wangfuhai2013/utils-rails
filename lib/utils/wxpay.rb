@@ -52,9 +52,9 @@ module Utils
 
      #微信支付统一调用接口
      def self.unifiedorder(trade_type,out_trade_no,total_fee,body,notify_url,openid,ip,app_id,mch_id,pay_sign_key)
-        app_id = Rails.configuration.weixin_app_id  if app_id.nil?        
-        pay_sign_key= Rails.configuration.weixin_pay_sign_key  if pay_sign_key.nil?
-        mch_id= Rails.configuration.weixin_mch_id if mch_id.nil?
+        app_id = Utils::Weixin.app_id  if app_id.nil?        
+        pay_sign_key= Utils::Weixin.pay_sign_key  if pay_sign_key.nil?
+        mch_id= Utils::Weixin.mch_id if mch_id.nil?
 
         #构造支付订单接口参数
         pay_params = {
