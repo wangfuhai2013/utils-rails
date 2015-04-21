@@ -17,7 +17,8 @@ module Utils
           full_name = Rails.root.join("public",thumb_file.to_s) 
           file = thumb_file if File.file?(full_name)
         end
-        output = "<div class=\"img-thumbnail\">" + image_tag("/"+file,:width=>width) +"</div>"
+        file = "/" + file if !file.start_with?("/") && !file.start_with?("http://")
+        output = "<div class=\"img-thumbnail\">" + image_tag(file,:width=>width) +"</div>"
       end
       
       output.html_safe
