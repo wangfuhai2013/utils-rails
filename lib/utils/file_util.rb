@@ -59,12 +59,12 @@ module Utils
            file_name   = get_upload_save_name(res_file.original_filename,to_jpg)
            abs_file_name = Rails.root.join("public",upload_path,file_name).to_s
            logger.debug("res_file:" + res_file.original_filename + ",abs_file_name:" + abs_file_name)
-           #所有图片默认自动转成jpg格式，并且宽控制在720以内，压缩质量为80，以减小文件大小           
-           max_width = 720
+                  
+           max_width = 0
            max_width = Rails.configuration.image_max_width.to_i if Rails.configuration.respond_to?('image_max_width')
            max_width = width unless width == 0
-
-           if File.extname(file_name) == '.jpg'
+           #只配置了image_max_width,才做图片缩小处理，jpg图质量统一使用80
+           if image_file?(abs_file_name) && (to_jpg || max_width > 0)
               resize_image_file(res_file.path,abs_file_name,max_width) 
            else             
              File.open(abs_file_name, 'wb') do |file|
@@ -105,11 +105,13 @@ module Utils
     def self.resize_image_file(src_file,desc_file,max_width)
        image = MiniMagick::Image.open(src_file)
 
-       if image[:width] > max_width
+       if image[:width] > max_width && max_width > 0
           image.resize max_width            
+       end
+       if File.extname(desc_file) == '.jpg'
+         image.format "jpg"
+         image.quality "80"                        
        end               
-       image.format "jpg"
-       image.quality "80"
        image.write desc_file
     end
 
