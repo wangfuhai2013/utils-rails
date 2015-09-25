@@ -7,10 +7,21 @@ module Utils
       Rails.logger
     end    
 
+    def self.get_full_path(path,file_name="")         
+      if Rails.configuration.respond_to?('upload_root') && !Rails.configuration.upload_root.blank?
+        full_path = File.join(Rails.configuration.upload_root,path).to_s
+      else
+        full_path = Rails.root.join("public",path).to_s
+      end
+      full_path = File.join(full_path,file_name) unless file_name.blank?
+      full_path
+    end
+
     #获取预览图文件名
     def self.get_thumb_file(file_name)
        file_name[0..file_name.index('.')-1] +  "_thumb.jpg" unless file_name.index('.').nil?
     end
+
     #获取移动图片文件名
     def self.get_mobile_file(file_name)
        file_name[0..file_name.index('.')-1] +  "_mobile.jpg" unless file_name.index('.').nil?
@@ -18,17 +29,17 @@ module Utils
 
     #删除文件
     def self.delete_file(file_name)
-      if file_name
-         full_name = Rails.root.join("public",file_name)
+      unless file_name.blank?
+         full_name = get_full_path(file_name)
          #logger.debug("delete file:"+full_name.to_s)
          File.delete(full_name) if File.exist?(full_name)
 
          thumb_name = get_thumb_file(file_name)
-         full_name = Rails.root.join("public",thumb_name) if thumb_name
+         full_name = get_full_path(thumb_name) if thumb_name
          File.delete(full_name) if File.file?(full_name)
 
          mobile_name = get_mobile_file(file_name)
-         full_name = Rails.root.join("public",mobile_name) if mobile_name
+         full_name = get_full_path(mobile_name) if mobile_name
          File.delete(full_name) if File.file?(full_name)
       end
     end
@@ -57,7 +68,8 @@ module Utils
        if res_file
            upload_path = get_upload_save_path
            file_name   = get_upload_save_name(res_file.original_filename,to_jpg)
-           abs_file_name = Rails.root.join("public",upload_path,file_name).to_s
+
+           abs_file_name = get_full_path(upload_path,file_name)
            logger.debug("res_file:" + res_file.original_filename + ",abs_file_name:" + abs_file_name)
                   
            max_width = 0
@@ -80,22 +92,23 @@ module Utils
     def self.save_from_url (url) 
         save_path  = get_upload_save_path + "/" + get_upload_save_name(url,false)
         conn = Faraday.new(:url => url)        
-        File.open(Rails.root.join("public",save_path).to_s, 'wb') { |f| f.write(conn.get.body) }
+        File.open(get_full_path(save_path).to_s, 'wb') { |f| f.write(conn.get.body) }
         return save_path
     end
 
     #获取上传文件保存路径
     def self.get_upload_save_path
        upload_path = Rails.configuration.upload_path + "/"+ Time.now.strftime("%Y%m/%d")
-       unless Dir.exist?(Rails.root.join("public",upload_path))
-         FileUtils.mkdir_p(Rails.root.join("public",upload_path))
+       unless Dir.exist?(get_full_path(upload_path))
+         FileUtils.mkdir_p(get_full_path(upload_path))
        end
        upload_path
     end
 
     #获取上传文件保存名称
     def self.get_upload_save_name(ori_filename,to_jpg=true)
-       file_name_main = Time.now.to_i.to_s+Digest::SHA1.hexdigest(rand(9999).to_s)[0,6]
+       file_name_main = Time.now.to_i.to_s + 
+                        Digest::SHA2.hexdigest(Time.now.to_s + rand(9999).to_s)[0,12]
        file_name_ext =  File.extname(ori_filename)
        file_name_ext = ".jpg" if image_file?(ori_filename) && to_jpg
        file_name = file_name_main + file_name_ext
@@ -164,10 +177,11 @@ module Utils
     def self.get_image_info(file)
       path = file
       if !file.start_with?("/")
-        path = Rails.root.join("public",file)
+        path = get_full_path(file)
       end
       image = MiniMagick::Image.open(path)
       return image
     end
+
   end
 end
