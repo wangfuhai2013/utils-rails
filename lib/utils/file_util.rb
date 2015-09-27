@@ -107,8 +107,7 @@ module Utils
 
     #获取上传文件保存名称
     def self.get_upload_save_name(ori_filename,to_jpg=true)
-       file_name_main = Time.now.to_i.to_s + 
-                        Digest::SHA2.hexdigest(Time.now.to_s + rand(9999).to_s)[0,12]
+       file_name_main = (Time.now.to_f * 1000000).to_i.to_s(16) + Digest::SHA2.hexdigest(rand.to_s)[0,8]
        file_name_ext =  File.extname(ori_filename)
        file_name_ext = ".jpg" if image_file?(ori_filename) && to_jpg
        file_name = file_name_main + file_name_ext
