@@ -125,6 +125,7 @@ module Utils
          image.quality "80"                        
        end               
        image.write desc_file
+       File.chmod(0644,desc_file) # MiniMagick没有处理图片(resize或format）而直接写文件时，默认把文件权限设为600
     end
 
     #检查是否图片文件名
