@@ -19,12 +19,14 @@ module Utils
 
     #获取预览图文件名
     def self.get_thumb_file(file_name)
-       file_name[0..file_name.index('.')-1] +  "_thumb.jpg" unless file_name.index('.').nil?
+       extname = File.extname(file_name)
+       file_name[0..file_name.index('.')-1] +  "_thumb" + extname unless file_name.index('.').nil?
     end
 
     #获取移动图片文件名
     def self.get_mobile_file(file_name)
-       file_name[0..file_name.index('.')-1] +  "_mobile.jpg" unless file_name.index('.').nil?
+       extname = File.extname(file_name)
+       file_name[0..file_name.index('.')-1] +  "_mobile" + extname unless file_name.index('.').nil?
     end  
 
     #删除文件
@@ -108,17 +110,17 @@ module Utils
     #获取上传文件保存名称
     def self.get_upload_save_name(ori_filename,to_jpg=true)
        file_name_main = (Time.now.to_f * 1000000).to_i.to_s(16) + Digest::SHA2.hexdigest(rand.to_s)[0,8]
-       file_name_ext =  File.extname(ori_filename)
+       file_name_ext =  File.extname(ori_filename).downcase #扩展名统一小写
        file_name_ext = ".jpg" if image_file?(ori_filename) && to_jpg
        file_name = file_name_main + file_name_ext
     end
 
     #缩小图片尺寸
-    def self.resize_image_file(src_file,desc_file,max_width)
+    def self.resize_image_file(src_file,desc_file="",max_width=0)
        image = MiniMagick::Image.open(src_file)
-
+       desc_file = src_file if desc_file.blank?
        if image[:width] > max_width && max_width > 0
-          image.resize max_width            
+          image.resize max_width.to_s + "x"            
        end
        if File.extname(desc_file) == '.jpg'
          image.format "jpg"
@@ -135,13 +137,16 @@ module Utils
 
     #生成缩略图
     def self.thumb_image(file_name,format="jpg",size="0")
+       file_name = get_full_path(file_name)  if !file_name.start_with?("/")
        if image_file?(file_name)
          image = MiniMagick::Image.open(file_name)
-         image.format format
-         
-         thumb_size = "300x300^" 
+         unless format.blank?
+           image.format format 
+           file_name =  file_name[0..file_name.index('.')] + format
+         end
+         thumb_size = "300x" 
          thumb_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_thumb_size')    
-         thumb_size = size unless size == "0"
+         thumb_size = size.to_s + "x" unless size == "0"
 
          image.resize thumb_size
          #image.combine_options do |i|           
@@ -155,13 +160,17 @@ module Utils
 
     #生成手机图
     def self.mobile_image(file_name,format="jpg",size="0")
+       file_name = get_full_path(file_name)  if !file_name.start_with?("/")
        if image_file?(file_name)
          image = MiniMagick::Image.open(file_name)
-         image.format format
+         unless format.blank?
+           image.format format 
+           file_name =  file_name[0..file_name.index('.')] + format
+         end
          
          mobile_size = "720x" 
          mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
-         mobile_size = size unless size == "0"
+         mobile_size = size.to_s + "x" unless size == "0"
 
          image.resize mobile_size
          #image.combine_options do |i|           
@@ -174,12 +183,9 @@ module Utils
     end
 
     #获取图片文件信息
-    def self.get_image_info(file)
-      path = file
-      if !file.start_with?("/")
-        path = get_full_path(file)
-      end
-      image = MiniMagick::Image.open(path)
+    def self.get_image_info(file_name)
+      file_name = get_full_path(file_name)  if !file_name.start_with?("/")
+      image = MiniMagick::Image.open(file_name)
       return image
     end
 
