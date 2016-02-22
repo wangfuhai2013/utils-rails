@@ -1,5 +1,6 @@
 module Utils
   class Weixin    
+    @@ticket_list = {}
     @@access_token_list = {}
     @@oauth2_access_token_list = {}
     
@@ -166,6 +167,35 @@ module Utils
        return token
      end
 
+    def self.get_ticket(type="jsapi",access_token="",app_id=nil,app_secret=nil)
+        access_token = get_access_token(app_id,app_secret) if access_token.blank?
+        key = access_token.to_s + "_" + type
+        cache = @@ticket_list[key]
+        ticket = nil
+        logger.debug("Utils::Weixin.get_ticket,cache ticket:"+cache.to_s)      
+        if cache.nil? || cache[:expire_time].nil? || 
+                         cache[:expire_time] - 600 < Time.now.to_i
+           #提前十分钟过期，避免时间不同步导致时间差异
+          url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + access_token.to_s +
+                "&type=" + type.to_s
+          result =JSON.parse(Net::HTTP.get(URI.parse(url)))
+          logger.debug("get get_ticket result :"+result.to_s)
+          if result['ticket']
+            cache = {} if cache.nil?
+            cache[:ticket] = result['ticket']
+            cache[:expire_time] = Time.now.to_i + result['expires_in'].to_i
+            ticket =  cache[:ticket]
+            @@ticket_list[key] = cache # 更新缓存
+            logger.debug("Utils::Weixin.get_ticket,ticket is update:" + cache[:ticket].to_s)
+          else
+            logger.error('Utils::Weixin.get_ticket,获取ticket出错:' + result['errmsg'].to_s)
+          end
+       else
+          ticket =  cache[:ticket]
+       end
+       return ticket
+    end
+
     #发送客服消息
     def self.send_customer_message(to_openid,message,app_id=nil,app_secret=nil)
       app_id = Utils::Weixin.app_id if app_id.nil?
@@ -204,17 +234,22 @@ module Utils
 
 
     #sign_string :appid, :appkey, :noncestr, :package, :timestamp
-    def self.pay_sign(sign_params = {},sign_type = 'SHA1')
+    def self.api_sign(sign_params = {},sign_type = 'SHA1')
       #logger.debug(sign_params)
       result_string = ''
       sign_params = sign_params.sort
       sign_params.each{|key,value|
         result_string += (key.to_s + '=' + value.to_s + '&')
       }
-      logger.debug(result_string[0, result_string.length - 1])    
-      sign = Digest::MD5.hexdigest(result_string[0, result_string.length - 1]).upcase if sign_type == 'MD5'
-      sign = Digest::SHA1.hexdigest(result_string[0, result_string.length - 1]) if sign_type == 'SHA1'
+      result_string = result_string[0, result_string.length - 1]#去掉多余的&号
+      logger.debug(result_string)    
+      sign = Digest::MD5.hexdigest(result_string).upcase if sign_type == 'MD5'
+      sign = Digest::SHA1.hexdigest(result_string) if sign_type == 'SHA1'
       sign
+    end  
+    #兼容老接口
+    def self.pay_sign(sign_params = {},sign_type = 'SHA1')      
+        api_sign(sign_params,sign_type)
     end
 
   end
