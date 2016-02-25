@@ -31,7 +31,7 @@ module Utils
      end
 
      #获取oauth2 url
-     def self.get_oauth2_url(redirect_uri,auth_type,app_id=nil)
+     def self.get_oauth2_url(redirect_uri,auth_type="snsapi_userinfo",app_id=nil)
         app_id = Utils::Weixin.app_id if app_id.nil?
         redirect_uri = CGI::escape(redirect_uri)
         
@@ -108,6 +108,10 @@ module Utils
      end
 
     #通过网页授权获取用户信息（无须关注公众号）
+    def self.get_userinfo_by_authcode(code,app_id=nil,app_secret=nil)  
+       openid,access_token = get_openid_and_access_token(code,app_id,app_secret)
+      return get_userinfo_by_auth(access_token,openid)
+    end  
     def self.get_userinfo_by_auth(access_token,openid)
       url = "https://api.weixin.qq.com/sns/userinfo?access_token=" + access_token.to_s + 
             "&openid=" + openid.to_s + "&lang=zh_CN"

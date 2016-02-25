@@ -91,8 +91,9 @@ module Utils
     end 
 
     #从URL保存文件
-    def self.save_from_url (url) 
-        save_path  = get_upload_save_path + "/" + get_upload_save_name(url,false)
+    def self.save_from_url (url,to_jpg=false)       
+        save_path  = get_upload_save_path + "/" + get_upload_save_name(url,to_jpg)
+        save_path  += ".jpg" if to_jpg && File.extname(save_path).blank?
         conn = Faraday.new(:url => url)        
         File.open(get_full_path(save_path).to_s, 'wb') { |f| f.write(conn.get.body) }
         return save_path
