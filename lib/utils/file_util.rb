@@ -18,14 +18,16 @@ module Utils
     end
 
     #获取预览图文件名
-    def self.get_thumb_file(file_name)
-       extname = File.extname(file_name)
+    def self.get_thumb_file(file_name,extname="")
+       extname = File.extname(file_name) if extname.blank?
+       extname = "." + extname if extname.index('.').nil?
        file_name[0..file_name.index('.')-1] +  "_thumb" + extname unless file_name.index('.').nil?
     end
 
     #获取移动图片文件名
-    def self.get_mobile_file(file_name)
-       extname = File.extname(file_name)
+    def self.get_mobile_file(file_name,extname="")
+       extname = File.extname(file_name) if extname.blank?
+       extname = "." + extname if extname.index('.').nil?
        file_name[0..file_name.index('.')-1] +  "_mobile" + extname unless file_name.index('.').nil?
     end  
 
@@ -40,11 +42,21 @@ module Utils
          full_name = get_full_path(thumb_name) if thumb_name
          File.delete(full_name) if File.file?(full_name)
 
+         thumb_name = get_thumb_file(file_name,'jpg')
+         full_name = get_full_path(thumb_name) if thumb_name
+         File.delete(full_name) if File.file?(full_name)
+
          mobile_name = get_mobile_file(file_name)
          full_name = get_full_path(mobile_name) if mobile_name
          File.delete(full_name) if File.file?(full_name)
+
+         mobile_name = get_mobile_file(file_name,'jpg')
+         full_name = get_full_path(mobile_name) if mobile_name
+         File.delete(full_name) if File.file?(full_name)
+
       end
     end
+
 
     #检查文件上传许可
     def self.check_ext(res_file)
@@ -138,49 +150,38 @@ module Utils
 
     #生成缩略图
     def self.thumb_image(file_name,format="jpg",size="0")
-       file_name = get_full_path(file_name)  if !file_name.start_with?("/")
-       if image_file?(file_name)
-         image = MiniMagick::Image.open(file_name)
-         unless format.blank?
-           image.format format 
-           file_name =  file_name[0..file_name.index('.')] + format
-         end
-         thumb_size = "300x" 
-         thumb_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_thumb_size')    
-         thumb_size = size.to_s + "x" unless size == "0"
+      thumb_size = "300x" 
+      thumb_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_thumb_size')    
+      thumb_size = size.to_s + "x" unless size == "0"
 
-         image.resize thumb_size
-         #image.combine_options do |i|           
-         #  i.resize "150x150^"
-         #  i.gravity "center"
-         #  i.crop "150x150+0+0"
-         # end
-         image.write  get_thumb_file(file_name)
-       end
+      resize_image(file_name,get_thumb_file(file_name),thumb_size)
+      resize_image(file_name,get_thumb_file(file_name,format),thumb_size) if File.extname(file_name) != format
     end
 
     #生成手机图
-    def self.mobile_image(file_name,format="jpg",size="0")
-       file_name = get_full_path(file_name)  if !file_name.start_with?("/")
-       if image_file?(file_name)
-         image = MiniMagick::Image.open(file_name)
-         unless format.blank?
-           image.format format 
-           file_name =  file_name[0..file_name.index('.')] + format
-         end
-         
-         mobile_size = "720x" 
-         mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
-         mobile_size = size.to_s + "x" unless size == "0"
+    def self.mobile_image(file_name,format="jpg",size="0")         
+       mobile_size = "720x" 
+       mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
+       mobile_size = size.to_s + "x" unless size == "0"
 
-         image.resize mobile_size
+       resize_image(file_name,get_mobile_file(file_name),thumb_size)
+       resize_image(file_name,get_mobile_file(file_name,format),thumb_size) if File.extname(file_name) != format
+    end
+
+    #内部方法，不对外
+    def self.resize_image(src_file,desc_file,size)
+       src_file = get_full_path(src_file)  if !src_file.start_with?("/")
+       desc_file = get_full_path(desc_file)  if !desc_file.start_with?("/")      
+       if image_file?(src_file)
+         image = MiniMagick::Image.open(src_file)
+         image.resize size
          #image.combine_options do |i|           
          #  i.resize "150x150^"
          #  i.gravity "center"
          #  i.crop "150x150+0+0"
          # end
-         image.write  get_mobile_file(file_name)
-       end
+         image.write  desc_file
+       end      
     end
 
     #获取图片文件信息

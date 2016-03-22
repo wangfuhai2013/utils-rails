@@ -3,7 +3,7 @@
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "utils"
-  s.version     = "1.2.5"
+  s.version     = "1.2.6"
   s.authors     = ["wangfuhai"]
   s.email       = ["wangfuhai@gmail.com"]
   s.homepage    = "https://github.com/wangfuhai2013/utils-rails"
