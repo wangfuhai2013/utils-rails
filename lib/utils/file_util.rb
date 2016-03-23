@@ -130,6 +130,7 @@ module Utils
 
     #缩小图片尺寸
     def self.resize_image_file(src_file,dst_file="",max_width=0)
+       return unless File.exist?(src_file)
        image = MiniMagick::Image.open(src_file)
        dst_file = src_file if dst_file.blank?
        if image[:width] > max_width && max_width > 0
@@ -155,7 +156,7 @@ module Utils
       thumb_size = size.to_s  unless size == "0"
 
       resize_image(file_name,get_thumb_file(file_name),thumb_size)
-      resize_image(file_name,get_thumb_file(file_name,format),thumb_size) if File.extname(file_name) != format
+      resize_image(file_name,get_thumb_file(file_name,format),thumb_size) if File.extname(file_name).downcase.sub(".","") != format
     end
 
     #生成手机图
@@ -165,14 +166,15 @@ module Utils
        mobile_size = size.to_s  unless size == "0"
 
        resize_image(file_name,get_mobile_file(file_name),thumb_size)
-       resize_image(file_name,get_mobile_file(file_name,format),thumb_size) if File.extname(file_name) != format
+       resize_image(file_name,get_mobile_file(file_name,format),thumb_size) if File.extname(file_name).downcase.sub(".","") != format
     end
 
     #内部方法，不对外
-    def self.resize_image(src_file,dst_file,size)       
+    def self.resize_image(src_file,dst_file,size)   
+       #logger.debug(src_file + "," + dst_file + "," + size)    
        src_file = get_full_path(src_file)  if !src_file.start_with?("/")
        dst_file = get_full_path(dst_file)  if !dst_file.start_with?("/")      
-       if image_file?(src_file)
+       if image_file?(src_file) &&  File.exist?(src_file)
          image = MiniMagick::Image.open(src_file)
          size += "x" if !!(size =~ /\A[0-9]+\z/)  # 如果只设置一个数字，则默认为宽
          size += ">" if size.index(">").nil? && size.index("<").nil? && size.index("^").nil?  # 默认不放大，只缩小
