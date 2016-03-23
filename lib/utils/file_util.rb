@@ -129,18 +129,18 @@ module Utils
     end
 
     #缩小图片尺寸
-    def self.resize_image_file(src_file,desc_file="",max_width=0)
+    def self.resize_image_file(src_file,dst_file="",max_width=0)
        image = MiniMagick::Image.open(src_file)
-       desc_file = src_file if desc_file.blank?
+       dst_file = src_file if dst_file.blank?
        if image[:width] > max_width && max_width > 0
           image.resize max_width.to_s + "x"            
        end
-       if File.extname(desc_file) == '.jpg'
+       if File.extname(dst_file) == '.jpg'
          image.format "jpg"
          image.quality "80"                        
        end               
-       image.write desc_file
-       File.chmod(0644,desc_file) # MiniMagick没有处理图片(resize或format）而直接写文件时，默认把文件权限设为600
+       image.write dst_file
+       File.chmod(0644,dst_file) # MiniMagick没有处理图片(resize或format）而直接写文件时，默认把文件权限设为600
     end
 
     #检查是否图片文件名
@@ -152,7 +152,7 @@ module Utils
     def self.thumb_image(file_name,format="jpg",size="0")
       thumb_size = "300x" 
       thumb_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_thumb_size')    
-      thumb_size = size.to_s + "x" unless size == "0"
+      thumb_size = size.to_s  unless size == "0"
 
       resize_image(file_name,get_thumb_file(file_name),thumb_size)
       resize_image(file_name,get_thumb_file(file_name,format),thumb_size) if File.extname(file_name) != format
@@ -162,25 +162,35 @@ module Utils
     def self.mobile_image(file_name,format="jpg",size="0")         
        mobile_size = "720x" 
        mobile_size = Rails.configuration.image_thumb_size if Rails.configuration.respond_to?('image_mobile_size')    
-       mobile_size = size.to_s + "x" unless size == "0"
+       mobile_size = size.to_s  unless size == "0"
 
        resize_image(file_name,get_mobile_file(file_name),thumb_size)
        resize_image(file_name,get_mobile_file(file_name,format),thumb_size) if File.extname(file_name) != format
     end
 
     #内部方法，不对外
-    def self.resize_image(src_file,desc_file,size)
+    def self.resize_image(src_file,dst_file,size)       
        src_file = get_full_path(src_file)  if !src_file.start_with?("/")
-       desc_file = get_full_path(desc_file)  if !desc_file.start_with?("/")      
+       dst_file = get_full_path(dst_file)  if !dst_file.start_with?("/")      
        if image_file?(src_file)
          image = MiniMagick::Image.open(src_file)
+         size += "x" if !!(size =~ /\A[0-9]+\z/)  # 如果只设置一个数字，则默认为宽
+         size += ">" if size.index(">").nil? && size.index("<").nil? && size.index("^").nil?  # 默认不放大，只缩小
+         #logger.debug(src_file + "," + dst_file + "," + size)
          image.resize size
+         src_ext = File.extname(src_file).downcase.sub(".","")
+         dst_ext = File.extname(dst_file).downcase.sub(".","")
+         if src_ext != dst_ext
+           image.format dst_ext
+           image.quality "80" if dst_ext == 'jpg'                       
+         end               
+
          #image.combine_options do |i|           
          #  i.resize "150x150^"
          #  i.gravity "center"
          #  i.crop "150x150+0+0"
          # end
-         image.write  desc_file
+         image.write  dst_file
        end      
     end
 
