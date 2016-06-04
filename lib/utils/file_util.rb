@@ -113,7 +113,11 @@ module Utils
 
     #获取上传文件保存路径
     def self.get_upload_save_path
-       upload_path = Rails.configuration.upload_path + "/"+ Time.now.strftime("%Y%m/%d")
+       upload_path = "upload"
+       if Rails.configuration.respond_to?('upload_path') && !Rails.configuration.upload_path.blank?
+         upload_path = Rails.configuration.upload_path
+       end
+       upload_path += "/"+ Time.now.strftime("%Y%m/%d")
        unless Dir.exist?(get_full_path(upload_path))
          FileUtils.mkdir_p(get_full_path(upload_path))
        end
