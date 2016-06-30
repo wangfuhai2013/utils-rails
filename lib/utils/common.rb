@@ -7,6 +7,11 @@ module Utils
 	       ret = "'t'" if val.to_i > 0
 	       ret = "'f'" if val.to_i <= 0   
 	     end
+	     if ActiveRecord::Base.connection.adapter_name.downcase.starts_with? 'mysql'
+	       ret = 1 if val == 't'
+	       ret = 0 if val == 'f'   
+	     end
+
 	     ret
 	  end  
 
