@@ -65,7 +65,7 @@ module Utils
 
          is_allowed_ext = false
          Rails.configuration.upload_extname.split(';').each do |ext| 
-           if ext == extname
+           if ext.to_s.upcase == extname.to_s.upcase
               is_allowed_ext = true
               break
            end
