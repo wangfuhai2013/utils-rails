@@ -143,7 +143,8 @@ module Utils
        if File.extname(dst_file) == '.jpg'
          image.format "jpg"
          image.quality "80"                        
-       end               
+       end
+       image.auto_orient       
        image.write dst_file
        File.chmod(0644,dst_file) # MiniMagick没有处理图片(resize或format）而直接写文件时，默认把文件权限设为600
     end
@@ -184,6 +185,7 @@ module Utils
          size += ">" if size.index(">").nil? && size.index("<").nil? && size.index("^").nil?  # 默认不放大，只缩小
          #logger.debug(src_file + "," + dst_file + "," + size)
          image.resize size
+         image.auto_orient
          src_ext = File.extname(src_file).downcase.sub(".","")
          dst_ext = File.extname(dst_file).downcase.sub(".","")
          if src_ext != dst_ext
