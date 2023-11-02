@@ -182,7 +182,7 @@ module Utils
        if image_file?(src_file) &&  File.exist?(src_file)
          image = MiniMagick::Image.open(src_file)
          size += "x" if !!(size =~ /\A[0-9]+\z/)  # 如果只设置一个数字，则默认为宽
-         size += ">" if size.index(">").nil? && size.index("<").nil? && size.index("^").nil?  # 默认不放大，只缩小
+         size += ">" if size.index(">").nil? && size.index("<").nil? && size.index("^").nil? && size.index("!").nil? # 默认不放大，只缩小
          #logger.debug(src_file + "," + dst_file + "," + size)
          image.resize size
          image.auto_orient
