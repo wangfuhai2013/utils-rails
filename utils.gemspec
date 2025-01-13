@@ -2,13 +2,14 @@
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "utils"
+  s.name        = "utils-rails"
   s.version     = "1.2.13"
   s.authors     = ["wangfuhai"]
   s.email       = ["wangfuhai@gmail.com"]
   s.homepage    = "https://github.com/wangfuhai2013/utils-rails"
   s.summary     = "utils with rails"
   s.description = "utils with rails"
+  s.license       = "MIT"  
 
   s.files = Dir["{lib}/**/*", "MIT-LICENSE","Rakefile", "README.rdoc"]
 # s.test_files = Dir["test/**/*"]
