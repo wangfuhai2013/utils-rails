@@ -15,6 +15,9 @@ Gemfile.lock
 /db/*.sqlite3
 /db/*.sqlite3-journal
 
+*.sublime-*
+*.gem
+
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
