@@ -84,7 +84,7 @@ module Utils
            file_name   = get_upload_save_name(res_file.original_filename,to_jpg)
 
            abs_file_name = get_full_path(upload_path,file_name)
-           logger.debug("res_file:" + res_file.original_filename + ",abs_file_name:" + abs_file_name)
+           logger.debug("to_jpg:#{to_jpg},res_file:" + res_file.original_filename + ",abs_file_name:" + abs_file_name)
                   
            max_width = 0
            max_width = Rails.configuration.image_max_width.to_i if Rails.configuration.respond_to?('image_max_width')
@@ -125,10 +125,11 @@ module Utils
     end
 
     #获取上传文件保存名称
-    def self.get_upload_save_name(ori_filename,to_jpg=true)
+    def self.get_upload_save_name(ori_filename,to_jpg=true)       
        file_name_main = (Time.now.to_f * 1000000).to_i.to_s(16) + Digest::SHA2.hexdigest(rand.to_s)[0,8]
        file_name_ext =  File.extname(ori_filename).downcase #扩展名统一小写
        file_name_ext = ".jpg" if image_file?(ori_filename) && to_jpg
+       logger.debug("to_jpg:#{to_jpg},file_name_ext:#{file_name_ext}")
        file_name = file_name_main + file_name_ext
     end
 
@@ -151,7 +152,7 @@ module Utils
 
     #检查是否图片文件名
     def self.image_file?(file_name)
-       return !file_name.blank? && !!file_name.downcase.match("\\.png|\\.bmp|\\.jpeg|\\.jpg|\\.gif")
+       return !file_name.blank? && !!file_name.downcase.match("\\.png|\\.bmp|\\.jpeg|\\.jpg|\\.gif|\\.webp|\\.avif")
     end
 
     #生成缩略图
